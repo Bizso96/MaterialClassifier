@@ -47,14 +47,14 @@ class Minc2500:
             i = 0
 
             for filename in os.listdir(path):
-                if i >= IMAGES_PER_CATEGORY:
+                if i >= min(IMAGES_PER_CATEGORY, 2500):
                     i = 0
                     break
 
                 i += 1
 
                 if filename.endswith(".jpg"):
-                    print(" " + filename)
+                    # print(" " + filename)
                     img = cv2.imread(path + "/" + filename)
                     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
                     img = cv2.resize(img, (224, 224))
@@ -67,7 +67,3 @@ class Minc2500:
             split_index = int(images.shape[0] * TRAIN_TEST_RATIO)
 
             self.__train_data[material], self.__test_data[material] = np.split(images, [split_index])
-
-            for img in self.__train_data[material]:
-                plt.imshow(img)
-                plt.show()

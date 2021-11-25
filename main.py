@@ -6,4 +6,4 @@ minc2500 = Minc2500()
 minc2500.data_location = MINC2500_PATH
 minc2500.read_data()
 
-print()
+print("Done")
