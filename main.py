@@ -1,9 +1,6 @@
 from minc2500 import Minc2500
 from config import *
+from datagenerator import Minc2500DataGenerator
 
-minc2500 = Minc2500()
+minc2500_data_generator = Minc2500DataGenerator("D:/Files/Progs/Deep Learning/MaterialClassifier/data", 200, (64, 64, 3), 10, True)
 
-minc2500.data_location = MINC2500_PATH
-minc2500.read_data()
-
-print("Done")
