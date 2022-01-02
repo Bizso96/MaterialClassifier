@@ -48,6 +48,8 @@ class Minc2500DataGenerator(tf.keras.utils.Sequence):
                 self.test_labels.append(class_index)
                 # print(f'{self.data[-1]}:{self.labels[-1]}')
 
+        self.test_images = self.test_images
+
         return self.test_images, self.test_labels
 
     def test_data(self):
@@ -62,7 +64,7 @@ class Minc2500DataGenerator(tf.keras.utils.Sequence):
             images.append(img)
             labels.append(self.labels[index])
 
-        test_x = np.asarray(images)
+        test_x = np.asarray(images) / 255.0
         test_y = np.asarray(labels)
         # optionally you can use: batch_y = tf.keras.utils.to_categorical(batch_y, num_classes=self.num_classes)
         return test_x, test_y
@@ -89,7 +91,7 @@ class Minc2500DataGenerator(tf.keras.utils.Sequence):
                 images.append(img)
                 labels.append(self.labels[index])
 
-        batch_x = np.asarray(images)
+        batch_x = np.asarray(images) / 255.0
         batch_y = np.asarray(labels)
         # optionally you can use: batch_y = tf.keras.utils.to_categorical(batch_y, num_classes=self.num_classes)
         return batch_x, batch_y
@@ -112,8 +114,11 @@ batch_x, batch_y = dg[0]
 test_x, test_y = dg.test_data()
 
 fig, axes = plt.subplots(nrows=1, ncols=6, figsize=[16, 9])
-for i in range(len(axes)):
+for i in range(len(axes) // 2):
     axes[i].set_title(CLASSES[batch_y[i]])
     axes[i].imshow(batch_x[i])
+for i in range(len(axes) // 2, len(axes)):
+    axes[i].set_title("T:" + CLASSES[test_y[i]])
+    axes[i].imshow(test_x[i])
 plt.show()
 print()
