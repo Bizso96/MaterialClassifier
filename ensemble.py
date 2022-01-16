@@ -2,7 +2,7 @@ import numpy
 from keras import models
 from matplotlib import pyplot as plt
 
-from datagenerator import Minc2500DataGenerator
+from datagenerator import DataGenerator
 from minc2500 import Minc2500
 from config import *
 # from datagenerator import Minc2500DataGenerator
@@ -16,9 +16,9 @@ def ensemble(model1name, model2name, model3name):
     model1 = models.load_model(f"models/{model1name}")
     model2 = models.load_model(f"models/{model2name}")
     model3 = models.load_model(f"models/{model3name}")
-    dg = Minc2500DataGenerator("D:/Files/Progs/Deep Learning/MaterialClassifier/data", 500, (64, 64, 3), 10, True)
+    dg = DataGenerator("D:/Files/Progs/Deep Learning/MaterialClassifier/data", 500, (64, 64, 3), 10, True)
 
-    batch_x, batch_y = dg[0]
+    batch_x, batch_y = dg[4]
 
     fig, axes = plt.subplots(nrows=1, ncols=10, figsize=[16, 9])
     for i in range(len(axes)):

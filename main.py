@@ -1,7 +1,6 @@
 from keras import models
 from matplotlib import pyplot as plt
 
-from minc2500 import Minc2500
 from config import *
 # from datagenerator import Minc2500DataGenerator
 import tensorflow as tf
