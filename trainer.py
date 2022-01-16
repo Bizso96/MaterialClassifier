@@ -5,6 +5,11 @@ import cv2
 import keras
 import numpy as np
 import tempfile
+import pandas as pd
+import seaborn as sn
+
+import sklearn
+from sklearn.metrics import confusion_matrix
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
@@ -41,7 +46,7 @@ class ModelTrainer:
                             loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                             metrics=['accuracy'])
 
-        early_stop_callback = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=5)
+        early_stop_callback = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=8)
 
         history = self._model.fit(
             x=self.train_data_generator,
@@ -64,7 +69,7 @@ class ModelTrainer:
                             loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                             metrics=['accuracy'])
 
-        early_stop_callback = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=5)
+        early_stop_callback = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=8)
 
         history = self._model.fit(
             x=self.train_data_generator,
@@ -364,8 +369,75 @@ def fmd_train():
 
     return model_trainer
 
+def build_confusion_matrix_minc2500():
+    model = tf.keras.models.load_model('models/model_minc2500_inceptionV3_weights_base_fine_tuned')
 
-with tf.device('/GPU:0'):
-    model_trainer = minc2500_train()
-    model_trainer.initialize_model_inceptionV3_weights_base('model_minc2500_inceptionV3_weights_base', image_augment=False)
-    model_trainer.start_train_transfer()
+    start = 0
+    train_data_end = MINC2500_TRAIN_AMOUNT
+    validation_data_end = train_data_end + MINC2500_VALIDATION_AMOUNT
+    test_data_end = validation_data_end + MINC2500_TEST_AMOUNT
+    root_dir = f'{DATA_ROOT_PATH}/{MINC2500_PATH}'
+
+    minc2500_test_data_generator = DataGenerator(root_dir, 500, INPUT_SHAPE, len(CLASSES), validation_data_end,
+                                                 test_data_end)
+
+    y_pred_all = []
+    y_true_all = []
+
+    for i in range(10):
+        x_true, y_true = minc2500_test_data_generator[i]
+        y_true_all.extend(y_true)
+
+        y_pred = model.predict(x=x_true, batch_size=50).argmax(axis=1)
+        y_pred_all.extend(y_pred)
+
+    cm = confusion_matrix(y_true_all, y_pred_all)
+
+    df_cm = pd.DataFrame(cm, index=[i for i in CLASSES],
+                         columns=[i for i in CLASSES])
+    plt.figure(figsize=(10, 7))
+    sn.heatmap(df_cm, annot=True, fmt='.0f')
+
+    plt.show()
+
+    print(cm)
+
+
+def build_confusion_matrix_fmd():
+    model = tf.keras.models.load_model('models/model_fmd_inceptionV3_weights_base_fine_tuned')
+
+    start = 0
+    train_data_end = FMD_TRAIN_AMOUNT
+    validation_data_end = train_data_end + FMD_VALIDATION_AMOUNT
+    test_data_end = validation_data_end + FMD_TEST_AMOUNT
+    root_dir = f'{DATA_ROOT_PATH}/{FMD_PATH}'
+
+    fmd_test_data_generator = DataGenerator(root_dir, 20, INPUT_SHAPE, len(CLASSES), validation_data_end,
+                                                 test_data_end)
+
+    y_pred_all = []
+    y_true_all = []
+
+    for i in range(10):
+        x_true, y_true = fmd_test_data_generator[i]
+        y_true_all.extend(y_true)
+
+        y_pred = model.predict(x=x_true, batch_size=20).argmax(axis=1)
+        y_pred_all.extend(y_pred)
+
+    cm = confusion_matrix(y_true_all, y_pred_all)
+
+    df_cm = pd.DataFrame(cm, index=[i for i in CLASSES],
+                         columns=[i for i in CLASSES])
+    plt.figure(figsize=(10, 7))
+    sn.heatmap(df_cm, annot=True, fmt='.0f')
+
+    plt.show()
+
+    print(cm)
+# model_trainer = fmd_train()
+# model_trainer.initialize_model_inceptionV3_weights_base('model_fmd_inceptionV3_weights_base', image_augment=True)
+# model_trainer.start_train_transfer()
+
+# build_confusion_matrix_minc2500()
+build_confusion_matrix_fmd()
